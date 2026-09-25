@@ -1,7 +1,7 @@
 /** 全局状态与业务动作：组件只读 state、调用动作，单一数据源 */
 (function () {
   const { reactive } = window.Vue;
-  const { ElMessage } = window.ElementPlus;
+  const { ElMessage, ElMessageBox } = window.ElementPlus;
   const A = window.App.api;
 
   /** 角色中文名：仅用于界面显示；权限判断一律继续用英文 role */
@@ -271,10 +271,18 @@
     loadFavorites();
   }
 
-  /** 收藏页取消收藏：成功后重拉当前页；若本页已空且非首页则自动回退一页 */
+  /** 收藏页取消收藏：先二次确认（防误点），成功后重拉当前页；本页已空且非首页则自动回退一页 */
   async function cancelFav(item) {
     const id = item.resource_id ?? item.id;
     if (item._busy) return;                       // 防连点
+    try {
+      await ElMessageBox.confirm(
+        `确定取消收藏《${item.title}》？该资源会从收藏列表移除。`
+        + '你的浏览、评分等行为记录与推荐结果不受影响，之后仍可重新收藏。',
+        '取消收藏', { type: 'warning', confirmButtonText: '确认取消', cancelButtonText: '再想想' });
+    } catch (e) {
+      return;                                     // 用户点了「再想想」或关闭弹窗：不做任何改动
+    }
     item._busy = true;
     try {
       const r = await A.removeFavorite(id);

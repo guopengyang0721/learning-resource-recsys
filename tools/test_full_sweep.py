@@ -123,7 +123,17 @@ for q, name in [('keyword=机器', '关键词'), ('category=数据库', '分类'
                 ('sort=rating', '评分排序'), ('sort=xxx', '非法sort忽略'), ('days=30', '时间窗')]:
     b, _, ms = req(f'/api/resources?page=1&size=8&{q}', token=S)
     results.append((isinstance(b.get('items'), list), f'{name} 筛选 {len(b.get("items", []))} 条', ms, None))
-rid = r0['items'][0]['id']
+# 挑一个当前未被该学生收藏的资源：后面的收藏/取消用例才不会动到真实收藏数据
+# （此前固定取列表首条，若它恰好已被收藏，用例的 DELETE 会把真实收藏删掉且无法恢复）
+rid, was_fav = None, False
+for it in r0['items']:
+    dd, _, _ = req(f"/api/resources/{it['id']}", token=S)
+    if dd.get('favorited') is not True:
+        rid = it['id']
+        break
+if rid is None:                                   # 兜底：首屏全被收藏时取首条，并在用例结束后复原
+    rid = r0['items'][0]['id']
+    was_fav = req(f'/api/resources/{rid}', token=S)[0].get('favorited') is True
 d, _, _ = req(f'/api/resources/{rid}', token=S)
 sim, _, _ = req(f'/api/resources/{rid}/similar?n=5', token=S)
 results.append(('title' in d and len(sim.get('items', [])) <= 5, f'详情+相似 {len(sim.get("items", []))} 条', 0, None))
@@ -138,6 +148,10 @@ results.append((fb.get('favorited') is True, '收藏后 favorited=true', 0, None
 fc, _, _ = req(f'/api/favorites/{rid}', 'DELETE', token=S)                                # 取消
 fd, _, _ = req(f'/api/resources/{rid}', token=S)
 results.append((fd.get('favorited') is False, '取消后 favorited=false(行为保留)', 0, None))
+if was_fav:                                      # 兜底路径：原本已收藏 → 测完复原，不留痕
+    req(f'/api/favorites/{rid}', 'POST', token=S)
+    chk, _, _ = req(f'/api/resources/{rid}', token=S)
+    results.append((chk.get('favorited') is True, '原本已收藏的资源已复原', 0, None))
 
 # ---------- 推荐 ----------
 section('推荐引擎')
