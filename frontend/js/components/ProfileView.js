@@ -196,8 +196,15 @@
         } finally { secLoading.value = false; }
       }
 
+      /** 「账号设置」下拉的指令分发 */
+      function onAccountCmd(cmd) {
+        if (cmd === 'pwd') openPwd();
+        else if (cmd === 'sec') openSec();
+        else if (cmd === 'upgrade') upVisible.value = true;
+      }
+
       return { s: state, section, openDetail, removeHistory, loadHistory, loadFavorites, changeFavPage,
-               roleName, interests,
+               roleName, interests, onAccountCmd,
                editVisible, editInterests, openEdit, submitInterests, loadPortrait, weekly, loadWeekly,
                profileVisible, profileForm, openProfile, submitProfile,
                pwdVisible, pwdForm, pwdLoading, openPwd, submitPwd,
@@ -264,19 +271,31 @@
             </div>
           </div>
 
-          <!-- 操作区：与信息区用细线分隔；主操作实心、其余朴素，避免多种颜色堆叠 -->
-          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--el-border-color-lighter);
-                      display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <el-button type="primary" @click="openProfile">编辑资料</el-button>
-            <el-button plain @click="openEdit">编辑兴趣</el-button>
-            <el-button plain @click="openPwd">修改密码</el-button>
-            <el-button plain @click="openSec">
-              {{ s.me.has_sec_question ? '修改密保问题' : '设置密保问题' }}
-            </el-button>
-            <el-button v-if="s.me.role === 'student'" type="warning" plain @click="upVisible = true">升级为教师</el-button>
-            <span v-if="!s.me.has_sec_question" style="color:#e6a23c;font-size:12px;margin-left:6px">
-              ⚠️ 未设置密保问题，忘记密码时只能联系管理员重置
-            </span>
+          <!-- 操作区：与信息区用细线分隔；常用操作平铺，安全类操作收进「账号设置」下拉 -->
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--el-border-color-lighter)">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <el-button type="primary" @click="openProfile">编辑资料</el-button>
+              <el-button plain @click="openEdit">编辑兴趣</el-button>
+
+              <el-dropdown style="margin-left:auto" trigger="click" @command="onAccountCmd">
+                <el-button plain>
+                  账号设置<span style="margin-left:6px;font-size:12px;color:#a8abb2">▾</span>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="pwd">修改密码</el-dropdown-item>
+                    <el-dropdown-item command="sec">
+                      {{ s.me.has_sec_question ? '修改密保问题' : '设置密保问题' }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="s.me.role === 'student'" command="upgrade" divided>升级为教师</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+
+            <div v-if="!s.me.has_sec_question" style="color:#e6a23c;font-size:12px;margin-top:10px">
+              ⚠️ 尚未设置密保问题，忘记密码时只能联系管理员重置
+            </div>
           </div>
         </el-card>
 
