@@ -7,14 +7,13 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import BehaviorLog, Favorite, Notification, Resource, TeacherInvite, User
+from app.models import (ACTION_NAME, BehaviorLog, Favorite, Notification,
+                        Resource, TeacherInvite, User)
 from app.ratelimit import (LOCK_SECONDS, record_failure, record_success,
                            remaining_lock_seconds)
 from app.schemas import ChangePwdIn, InterestsIn, ProfileIn, SetSecIn, UpgradeTeacherIn
 from app.security import get_current_user, hash_pwd, make_token, verify_pwd
 from app.services import RETRAIN_COOLDOWN, get_engine, mark_dirty, train_engine
-
-ACTION_NAME = {"view": "浏览", "favorite": "收藏", "rate": "评分", "download": "下载"}
 
 router = APIRouter(prefix="/api/user", tags=["个人中心"])
 

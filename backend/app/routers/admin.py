@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 
 from app.config import DEFAULT_RESET_PASSWORD, EVAL_METRICS_PATH
 from app.db import get_db
-from app.models import BehaviorLog, Favorite, Notification, Resource, Score, TeacherInvite, User
+from app.models import (ACTION_NAME, BehaviorLog, Favorite, Notification,
+                        Resource, Score, TeacherInvite, User)
 from app.schemas import BroadcastIn, ResetPwdIn, StatusIn
 from app.security import hash_pwd, require_admin
 from app.services import collect_interactions, get_engine, mark_dirty, remove_resource_file
@@ -81,6 +82,7 @@ def dashboard(db: Session = Depends(get_db)):
             .join(Resource, BehaviorLog.resource_id == Resource.id)
             .order_by(BehaviorLog.id.desc()).limit(30).all())
     recent = [{"id": b.id, "user": nick, "title": title, "action": b.action,
+               "action_name": ACTION_NAME.get(b.action, b.action),
                "time": b.created_at.strftime("%m-%d %H:%M")}
               for b, nick, title in logs]
 
@@ -226,7 +228,8 @@ def export_behaviors(db: Session = Depends(get_db)):
             .join(Resource, BehaviorLog.resource_id == Resource.id)
             .order_by(BehaviorLog.id)
             .yield_per(1000))
-    rows = ((b.id, b.user_id, username, b.resource_id, title, b.action,
+    rows = ((b.id, b.user_id, username, b.resource_id, title,
+             ACTION_NAME.get(b.action, b.action),
              b.value, b.created_at.strftime("%Y-%m-%d %H:%M:%S"))
             for b, username, title in logs)
     return _csv_response(f"behaviors_{datetime.now():%Y%m%d}.csv",

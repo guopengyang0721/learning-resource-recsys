@@ -159,7 +159,14 @@
           <el-table-column prop="time" label="时间" width="110"></el-table-column>
           <el-table-column prop="user" label="用户" width="120"></el-table-column>
           <el-table-column prop="title" label="资源" min-width="220"></el-table-column>
-          <el-table-column prop="action" label="行为" width="90"></el-table-column>
+          <el-table-column label="行为" width="90">
+            <template #default="scope">
+              <el-tag size="small"
+                      :type="scope.row.action==='rate' ? 'warning' : (scope.row.action==='favorite' ? 'success' : 'info')">
+                {{ scope.row.action_name || scope.row.action }}
+              </el-tag>
+            </template>
+          </el-table-column>
         </el-table>
       </el-card>
     </div>`

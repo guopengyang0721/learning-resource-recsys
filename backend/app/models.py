@@ -72,6 +72,10 @@ class BehaviorLog(Base):
     created_at = Column(DateTime, default=datetime.now)
 
 
+# 行为类型的中文名：接口与界面统一取用，避免各路由/组件各自维护一份映射
+ACTION_NAME = {"view": "浏览", "favorite": "收藏", "rate": "评分", "download": "下载"}
+
+
 class Notification(Base):
     __tablename__ = "notification"
     id = Column(PK, primary_key=True, autoincrement=True)
