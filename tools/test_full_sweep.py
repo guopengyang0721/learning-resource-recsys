@@ -30,6 +30,32 @@ def section(title):
     results.append((None, f'\n===== {title} =====', 0, None))
 
 
+# ---------- 临时账号自动清理 ----------
+# 脚本注册的测试账号在退出时（含异常退出）统一删除，避免演示数据被历次巡检污染。
+import atexit
+
+_created, _admin_token = [], [None]
+
+
+def track_account(user_id, username):
+    """登记本脚本创建的临时账号，供退出时清理。"""
+    if user_id:
+        _created.append((user_id, username))
+
+
+@atexit.register
+def _cleanup_accounts():
+    if not _created or not _admin_token[0]:
+        return
+    print('\n-- 清理本次创建的测试账号 --')
+    for uid, uname in _created:
+        try:
+            _, code, _ = req(f'/api/admin/users/{uid}', 'DELETE', token=_admin_token[0])
+            print('   %s %s' % ('已删除' if code == 200 else '删除失败[%d]' % code, uname))
+        except Exception as e:
+            print('   删除失败 %s: %s' % (uname, type(e).__name__))
+
+
 # ---------- 匿名/鉴权边界 ----------
 section('鉴权边界')
 req('/api/resources?page=1&size=1', expect=401)                    # 无令牌
@@ -42,6 +68,7 @@ stu, _, _ = req('/api/auth/login', 'POST', {'username': 'student001', 'password'
 tea, _, _ = req('/api/auth/login', 'POST', {'username': 'teacher01', 'password': '123456'})
 adm, _, _ = req('/api/auth/login', 'POST', {'username': 'admin', 'password': 'admin123'})
 S, T, A = stu['token'], tea['token'], adm['token']
+_admin_token[0] = A                     # 供脚本退出时清理临时账号
 req('/api/auth/login', 'POST', {'username': 'student001', 'password': 'wrongpw'}, expect=400)  # 错密码
 stu2, c2, _ = req('/api/auth/verify', token=S)
 results.append((c2 == 200 and stu2.get('user_id') == stu['user_id'], 'verify 令牌身份一致', 0, None))
@@ -53,6 +80,7 @@ reg, _, _ = req('/api/auth/register', 'POST', {
     'username': 'sweep' + suffix, 'password': 'sweep123', 'nickname': '巡检临时号',
     'interests': ['机器学习', '人工智能'], 'gender': '男', 'grade': '2024级',
     'college': '信息学院', 'sec_question': '你的出生城市是？', 'sec_answer': '北京'})
+track_account(reg.get('user_id'), 'sweep' + suffix)      # 退出时自动清理
 SW = reg.get('token', '')
 results.append((bool(SW), '注册带兴趣+密保', 0, None))
 # 防枚举测试用随机用户名：固定用户名多轮累计会触发限流 429（限流正常工作，测试不应误伤）

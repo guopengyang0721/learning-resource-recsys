@@ -29,6 +29,26 @@ def call(u, token=None, data=None, method=None):
         return e.code, json.loads(e.read())
 
 
+# ---------- 临时账号自动清理 ----------
+# 本脚本注册的测试账号在退出时（含异常退出）统一删除，避免污染演示数据。
+import atexit
+
+_created, _admin = [], [None]
+
+
+@atexit.register
+def _cleanup_accounts():
+    if not _created or not _admin[0]:
+        return
+    print('\n-- 清理本次创建的测试账号 --')
+    for uid, uname in _created:
+        try:
+            s, _ = call(f'{BASE}/api/admin/users/{uid}', token=_admin[0], method='DELETE')
+            print('   %s %s' % ('已删除' if s == 200 else '删除失败[%d]' % s, uname))
+        except Exception as e:
+            print('   删除失败 %s: %s' % (uname, type(e).__name__))
+
+
 print('== A. 登录锁定（服务端集成）==')
 for i in range(4):
     s, r = call(BASE + '/api/auth/login', data={'username': USER, 'password': f'wrong{i}'})
@@ -53,9 +73,13 @@ rl._attempts.clear()
 print('\n== C. 密保答案防猜测（服务端集成，独立用户）==')
 import random
 uname = 'bf%d' % random.randint(1000, 9999)
+_admin[0] = call(BASE + '/api/auth/login',
+                 data={'username': 'admin', 'password': 'admin123'})[1].get('token')
 s, r = call(BASE + '/api/auth/register', data={
     'username': uname, 'password': 'test123456', 'nickname': '防猜测试',
     'sec_question': '你的出生城市是？', 'sec_answer': '西安'})
+if s == 200:
+    _created.append((r.get('user_id'), uname))     # 退出时自动清理
 print('   注册(带密保):', s)
 for i in range(5):
     s, r = call(BASE + '/api/auth/forgot-password',

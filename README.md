@@ -67,6 +67,8 @@ python tools/test_ui_sweep.py
 
 两个脚本默认针对本机 `http://127.0.0.1:8000`。UI 巡检脚本通过 `?autologin=1&user=student|teacher|admin` 参数免去重复填表——该参数**仅在 127.0.0.1 / localhost 访问时生效**，部署到其他主机后自动失效。浏览器 profile 存放在系统临时目录（`tools/start_browser.py` 负责启动），不会写入项目。
 
+API 回归与防爆破脚本会在退出时（含异常中断）**自动删除本次注册的测试账号**，不会污染演示数据。
+
 ## 部署注意事项
 
 | 项 | 说明 |
