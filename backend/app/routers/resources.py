@@ -1,4 +1,4 @@
-"""资源管理路由 —— 列表检索 / 详情 / 相似推荐 / 文件下载 / 上传"""
+"""资源管理路由 —— 列表检索 / 详情 / 相似推荐 / 文件下载（资源上传由 teacher 路由负责）"""
 import os
 from datetime import datetime, timedelta
 
@@ -10,8 +10,7 @@ from sqlalchemy.orm import Session
 from app.config import UPLOAD_DIR
 from app.db import get_db
 from app.models import BehaviorLog, Favorite, Resource, Score, User
-from app.schemas import ResourceIn
-from app.security import get_current_user, require_roles
+from app.security import get_current_user
 from app.services import get_engine, mark_dirty, train_engine
 
 VALID_TYPES = ("video", "doc", "ppt", "question", "book", "course")
@@ -134,15 +133,3 @@ def similar_resources(resource_id: int, n: int = 5, db: Session = Depends(get_db
     items = eng.similar_items(resource_id, n=n)
     return {"base_id": resource_id, "base_title": r.title,
             "items": items, "total": len(items)}
-
-
-@router.post("")
-def create_resource(data: ResourceIn, db: Session = Depends(get_db),
-                    user: User = Depends(require_roles("teacher", "admin"))):
-    """教师/管理员上传资源：教师上传进入待审核（pending），管理员上传直接上架。"""
-    r = Resource(**data.model_dump(), uploader_id=user.id,
-                 status="online" if user.role == "admin" else "pending")
-    db.add(r)
-    db.commit()
-    msg = "资源发布成功" if r.status == "online" else "资源已提交，等待管理员审核"
-    return {"id": r.id, "status": r.status, "message": msg}
