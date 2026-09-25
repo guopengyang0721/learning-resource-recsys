@@ -34,13 +34,20 @@
           })
           .catch(() => {});
       }
+      /** 重置密码时的默认值：与后端 config.DEFAULT_RESET_PASSWORD 保持一致 */
+      const DEFAULT_RESET_PWD = '123456';
+
       function openReset(row) {
-        ElMessageBox.prompt(`为账号 ${row.username} 设置新密码（至少 6 位）`, '重置密码', { inputPattern: /^.{6,64}$/, inputErrorMessage: '密码至少 6 位' })
+        ElMessageBox.prompt(
+          `为账号 ${row.username} 设置新密码（6~64 位）。已预填默认密码 ${DEFAULT_RESET_PWD}，`
+          + '直接确认即可；也可改成其他密码。',
+          '重置密码',
+          { inputValue: DEFAULT_RESET_PWD, inputPattern: /^.{6,64}$/, inputErrorMessage: '密码需为 6~64 位' })
           .then(async ({ value }) => {
             try {
               const r = await A.resetUserPassword(row.id, value);
               if (r.detail) return ElMessage.error(r.detail);
-              ElMessage.success(r.message);
+              ElMessage.success(r.message);      // 后端会回显生效的密码，便于转告用户
             } catch (e) { ElMessage.error('重置失败，请稍后重试'); }
           })
           .catch(() => {});

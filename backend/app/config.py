@@ -19,6 +19,10 @@ if not os.environ.get("SECRET_KEY"):
 SESSION_TTL = 2 * 3600                  # 会话级令牌有效期：2 小时（不勾"记住我"）
 REMEMBER_TTL = 7 * 24 * 3600            # 记住我令牌有效期：7 天
 
+# 管理员重置用户密码时使用的默认密码（管理后台「重置密码」弹窗会预填该值，可直接确认）
+# 注：重置后的账号使用同一初始密码，适用于本地/教学环境；正式部署建议改为逐个设定
+DEFAULT_RESET_PASSWORD = os.environ.get("DEFAULT_RESET_PASSWORD", "123456")
+
 # 资源文件上传（教师拖拽上传）
 UPLOAD_DIR = os.path.join(BASE_DIR, "data", "uploads")     # 存储目录（与库同盘，便于整体打包/迁移）
 MAX_UPLOAD_MB = 50                                          # 单文件上限（MB）

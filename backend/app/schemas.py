@@ -46,7 +46,8 @@ class ChangePwdIn(BaseModel):
 
 
 class ResetPwdIn(BaseModel):
-    new_password: str = Field(min_length=6, max_length=64)
+    # 留空表示"重置为系统默认密码"（见 config.DEFAULT_RESET_PASSWORD）
+    new_password: str = Field("", max_length=64)
 
 
 class BroadcastIn(BaseModel):

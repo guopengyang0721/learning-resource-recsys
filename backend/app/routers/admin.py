@@ -8,7 +8,7 @@ from fastapi.responses import Response
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.config import EVAL_METRICS_PATH
+from app.config import DEFAULT_RESET_PASSWORD, EVAL_METRICS_PATH
 from app.db import get_db
 from app.models import BehaviorLog, Favorite, Notification, Resource, Score, TeacherInvite, User
 from app.schemas import BroadcastIn, ResetPwdIn, StatusIn
@@ -335,15 +335,22 @@ def set_user_status(user_id: int, data: StatusIn, db: Session = Depends(get_db),
 @router.put("/users/{user_id}/password")
 def reset_password(user_id: int, data: ResetPwdIn, db: Session = Depends(get_db),
                    admin: User = Depends(require_admin)):
-    """管理员重置用户密码（不能重置其他管理员——防止管理员间账号接管）。"""
+    """管理员重置用户密码（不能重置其他管理员——防止管理员间账号接管）。
+
+    请求体留空（或不传 new_password）即重置为系统默认密码，便于批量处理忘记密码的账号；
+    返回信息中回显实际生效的密码，管理员可直接转告用户。
+    """
     u = db.get(User, user_id)
     if not u:
         raise HTTPException(404, "用户不存在")
     if u.role == "admin" and u.id != admin.id:
         raise HTTPException(400, "不能重置其他管理员账号的密码")
-    u.password_hash = hash_pwd(data.new_password)
+    pwd = (data.new_password or "").strip() or DEFAULT_RESET_PASSWORD
+    if not 6 <= len(pwd) <= 64:
+        raise HTTPException(400, "密码长度需为 6~64 位")
+    u.password_hash = hash_pwd(pwd)
     db.commit()
-    return {"message": f"账号 {u.username} 的密码已重置"}
+    return {"message": f"账号 {u.username} 的密码已重置为「{pwd}」", "password": pwd}
 
 
 @router.delete("/users/{user_id}")
