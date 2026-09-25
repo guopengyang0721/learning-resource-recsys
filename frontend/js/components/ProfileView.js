@@ -13,6 +13,7 @@
                              '你最好的朋友的名字是？', '你的出生城市是？'];
       const ROLE_NAME = window.App.store.ROLE_NAME || {};
       const roleName = (r) => ROLE_NAME[r] || r;                      // 角色显示中文（判断仍用英文）
+      const FAV_PAGE_SIZE = 12;                          // 每页收藏数：3 列 × 4 行，需与 api.myFavorites 的默认 size 一致
       const interests = computed(() => (state.me.interests || []).filter(Boolean));
       const section = ref('info');                       // info | history | favs
       const editVisible = ref(false);
@@ -204,7 +205,7 @@
       }
 
       return { s: state, section, openDetail, removeHistory, loadHistory, loadFavorites, changeFavPage,
-               roleName, interests, onAccountCmd,
+               roleName, interests, onAccountCmd, FAV_PAGE_SIZE,
                editVisible, editInterests, openEdit, submitInterests, loadPortrait, weekly, loadWeekly,
                profileVisible, profileForm, openProfile, submitProfile,
                pwdVisible, pwdForm, pwdLoading, openPwd, submitPwd,
@@ -356,7 +357,7 @@
       </div>
 
       <!-- ===== 子页：我的足迹 ===== -->
-      <div v-else-if="section === 'history'" style="margin-top:12px">
+      <div v-else-if="section === 'history'" class="profile-subpage" style="margin-top:12px">
         <el-card>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
             <div style="color:#666;font-size:13px">
@@ -364,7 +365,7 @@
             </div>
             <el-button size="small" @click="loadHistory">🔄 刷新</el-button>
           </div>
-          <el-table :data="s.history.items" size="small" max-height="560">
+          <el-table :data="s.history.items" size="small" max-height="520">
             <el-table-column prop="time" label="时间" width="150"></el-table-column>
             <el-table-column prop="action_name" label="行为" width="90">
               <template #default="scope">
@@ -391,13 +392,13 @@
       </div>
 
       <!-- ===== 子页：我的收藏 ===== -->
-      <div v-else style="margin-top:12px">
+      <div v-else class="profile-subpage" style="margin-top:12px">
         <el-card>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
             <div style="color:#666;font-size:13px">共 {{ s.favs.total }} 条收藏，点击卡片查看详情</div>
             <el-button size="small" @click="loadFavorites">🔄 刷新</el-button>
           </div>
-          <el-row :gutter="12">
+          <el-row :gutter="12" class="fav-grid">
             <el-col v-for="f in s.favs.items" :key="f.resource_id" :xs="24" :sm="12" :md="8" style="margin-bottom:12px">
               <el-card shadow="hover" @click="openDetail(f)" :body-style="{padding:'14px'}">
                 <b style="font-size:14px">{{ f.title }}</b>
@@ -411,9 +412,9 @@
             </el-col>
           </el-row>
           <el-empty v-if="!s.favs.items.length" description="暂无收藏，去「资源检索」页发现好资源吧"></el-empty>
-          <el-pagination v-if="s.favs.total > s.favs.items.length || s.favs.total > 6"
-                         style="margin-top:6px" layout="total, prev, pager, next, jumper"
-                         :total="s.favs.total" :page-size="6"
+          <el-pagination v-if="s.favs.total > s.favs.items.length || s.favs.total > FAV_PAGE_SIZE"
+                         class="pager-bottom" layout="total, prev, pager, next, jumper"
+                         :total="s.favs.total" :page-size="FAV_PAGE_SIZE"
                          :current-page="s.favs.page" @current-change="changeFavPage"></el-pagination>
         </el-card>
       </div>

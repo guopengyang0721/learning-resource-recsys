@@ -39,6 +39,16 @@ body { margin:0; background:#f4f6fa; font-family:"Microsoft YaHei",sans-serif; }
 .page-head { margin-bottom:16px; }
 .page-head h2 { margin:0; font-size:20px; color:#243b6b; }
 .page-head p { margin:4px 0 0; color:#98a5bd; font-size:13px; }
+
+/* 个人中心子页（足迹/收藏）：内容区至少占满可视高度，
+   避免条目较少时卡片下方空出一大片灰色区域；分页固定在卡片底部 */
+.profile-subpage { min-height:calc(100vh - 215px); display:flex; flex-direction:column; }
+.profile-subpage > .el-card { flex:1; display:flex; flex-direction:column; }
+.profile-subpage > .el-card > .el-card__body { flex:1; display:flex; flex-direction:column; }
+.profile-subpage .pager-bottom { margin-top:auto; padding-top:14px; display:flex; justify-content:flex-end; }
+.profile-subpage .el-empty { flex:1; display:flex; flex-direction:column; justify-content:center; }
+/* 收藏卡片：同一行的卡片等高，标题长短不一时底边也能对齐 */
+.fav-grid .el-col > .el-card { height:100%; }
 @media (max-width:860px){
   .main-layout { flex-direction:column; }
   .side-nav { width:100%; height:auto; position:static; flex-direction:row; align-items:center; padding:8px 10px; }
