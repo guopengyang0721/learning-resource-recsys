@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个性化学习资源推荐系统</title>
+<link rel="stylesheet" href="/vendor/element-plus.css"
+      onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/element-plus@2.7.0/dist/index.css'">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<!-- 第三方库：本地 vendored 优先，缺失时回退 CDN -->
+<script>
+  function loadScript(src, onload) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = onload;
+    document.head.appendChild(s);
+  }
+  function loadLib(local, cdn, onload) {
+    loadScript(local, function () { onload && onload(); });
+    // 本地缺失时回退 CDN（onerror 由浏览器触发）
+    var first = document.head.lastChild;
+    first.onerror = function () {
+      var c = document.createElement('script');
+      c.src = cdn;
+      c.onload = onload;
+      document.head.appendChild(c);
+    };
+  }
+  function loadSeq(list, done) {
+    if (!list.length) { done && done(); return; }
+    loadScript(list[0], function () { loadSeq(list.slice(1), done); });
+  }
+  loadLib('/vendor/vue.global.prod.js', 'https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js', function () {
+    loadLib('/vendor/element-plus.full.min.js', 'https://cdn.jsdelivr.net/npm/element-plus@2.7.0/dist/index.full.min.js', function () {
+      loadLib('/vendor/element-plus-locale-zh-cn.min.js', 'https://cdn.jsdelivr.net/npm/element-plus@2.7.0/dist/locale/zh-cn.min.js', function () {
+        loadLib('/vendor/echarts.min.js', 'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js', function () {
+          loadSeq([
+            '/js/api.js',
+            '/js/store.js',
+            '/js/components/LoginView.js',
+            '/js/components/RecommendView.js',
+          '/js/components/ResourcesView.js',
+          '/js/components/ProfileView.js',
+            '/js/components/StatsView.js',
+            '/js/components/ResourceAdminView.js',
+            '/js/components/UserAdminView.js',
+            '/js/components/AdminView.js',
+            '/js/components/TeacherView.js',
+            '/js/components/DetailDialog.js',
+            '/js/app.js'
+          ]);
+        });
+      });
+    });
+  });
+</script>
+</body>
+</html>

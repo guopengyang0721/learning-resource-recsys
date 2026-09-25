@@ -1,0 +1,101 @@
+/* ============ 全局 ============ */
+body { margin:0; background:#f4f6fa; font-family:"Microsoft YaHei",sans-serif; }
+
+/* ============ 主界面：侧边导航布局 ============ */
+.main-layout { display:flex; min-height:100vh; }
+.side-nav {
+  width:225px; flex:none;
+  background:linear-gradient(180deg,#1e3a6e 0%,#152a52 100%);
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+}
+.nav-logo { display:flex; gap:10px; align-items:center; padding:20px 18px 14px; color:#fff; }
+.nav-logo .logo-ic { font-size:26px; line-height:1; }
+.nav-logo .t1 { font-size:15px; font-weight:700; letter-spacing:.5px; }
+.nav-logo .t2 { font-size:11px; opacity:.55; margin-top:2px; }
+.side-nav .nav-menu { border-right:none; background:transparent; flex:1; padding:6px 10px; }
+.side-nav .el-menu-item {
+  color:#c9d6f0; height:46px; line-height:46px; border-radius:8px;
+  margin:4px 0; font-size:14px;
+}
+.side-nav .el-menu-item .ic { margin-right:9px; font-size:15px; }
+.side-nav .el-menu-item:hover { background:rgba(255,255,255,.08); color:#fff; }
+.side-nav .el-menu-item.is-active {
+  background:linear-gradient(90deg,rgba(64,145,255,.85),rgba(47,111,216,.45)); color:#fff;
+}
+.nav-user {
+  margin:12px; padding:12px; border-radius:12px;
+  background:rgba(255,255,255,.07); display:flex; align-items:center; gap:10px; color:#fff;
+}
+.nav-avatar {
+  width:38px; height:38px; border-radius:50%; flex:none;
+  background:linear-gradient(135deg,#409eff,#2fa58a);
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.nav-uinfo { flex:1; min-width:0; }
+.nav-uinfo .un { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nav-uinfo .ur { font-size:11px; opacity:.65; margin-top:2px; }
+.main-content { flex:1; padding:22px 26px; background:#f4f6fa; min-width:0; }
+.page-head { margin-bottom:16px; }
+.page-head h2 { margin:0; font-size:20px; color:#243b6b; }
+.page-head p { margin:4px 0 0; color:#98a5bd; font-size:13px; }
+@media (max-width:860px){
+  .main-layout { flex-direction:column; }
+  .side-nav { width:100%; height:auto; position:static; flex-direction:row; align-items:center; padding:8px 10px; }
+  .nav-logo { padding:0 10px; }
+  .nav-logo .t2 { display:none; }
+  .side-nav .nav-menu { display:flex; flex:1; padding:0; overflow-x:auto; }
+  .side-nav .el-menu-item { height:38px; line-height:38px; margin:0 2px; white-space:nowrap; }
+  .nav-user { margin:0 0 0 8px; padding:6px 10px; }
+  .nav-uinfo .ur { display:none; }
+}
+
+/* ============ 登录页 ============ */
+.login-screen {
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#dceaff 0%,#eef3fb 45%,#e6f4f1 100%);
+  position:relative; overflow:hidden;
+}
+.login-bg {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; opacity:.5; z-index:0;
+  -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,.85) 100%);
+          mask-image:linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,.85) 100%);
+}
+.login-screen::before, .login-screen::after {
+  content:""; position:absolute; border-radius:50%; opacity:.35; z-index:0;
+}
+.login-screen::before { width:420px; height:420px; left:-120px; top:-140px;
+  background:radial-gradient(circle at 30% 30%, #9ec5ff, transparent 70%); }
+.login-screen::after { width:520px; height:520px; right:-160px; bottom:-200px;
+  background:radial-gradient(circle at 60% 60%, #9fe3d0, transparent 70%); }
+.login-panel {
+  display:flex; width:880px; max-width:92vw; min-height:520px;
+  background:#fff; border-radius:18px; overflow:hidden;
+  box-shadow:0 18px 60px rgba(31,64,128,.14); position:relative; z-index:1;
+}
+.login-brand {
+  flex:1.15; padding:52px 44px; color:#fff; display:flex; flex-direction:column; justify-content:center;
+  background:linear-gradient(150deg,#2f6fd8 0%,#3b82d8 55%,#2fa58a 130%);
+}
+.login-brand .logo { font-size:44px; line-height:1; }
+.login-brand h1 { font-size:24px; margin:14px 0 6px; letter-spacing:1px; }
+.login-brand .sub { font-size:13px; opacity:.85; line-height:1.7; }
+.login-brand ul { list-style:none; padding:0; margin:28px 0 0; }
+.login-brand li { font-size:14px; margin-bottom:14px; display:flex; align-items:center; }
+.login-brand li .ic {
+  width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,.18);
+  display:inline-flex; align-items:center; justify-content:center; margin-right:10px; font-size:15px;
+  flex:none;
+}
+.login-brand .foot { margin-top:auto; font-size:12px; opacity:.7; }
+.login-main { flex:1; display:flex; flex-direction:column; justify-content:center; padding:48px 44px; }
+.login-main h2 { margin:0 0 4px; font-size:21px; color:#243b6b; }
+.login-main .hint { color:#98a5bd; font-size:13px; margin-bottom:26px; }
+.login-main .el-input__wrapper { border-radius:10px; }
+.login-btn { width:100%; margin-top:6px; height:42px; font-size:15px; letter-spacing:6px;
+  border-radius:10px; background:linear-gradient(90deg,#409eff,#2f6fd8); border:none; }
+@media (max-width:760px){ .login-brand { display:none; } }
+
+/* ============ 主界面 ============ */

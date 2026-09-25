@@ -1,0 +1,29 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ---------- 运行时数据（首次启动自动生成，不入库）----------
+backend/data/
+*.db
+*.db-shm
+*.db-wal
+*.bak
+
+# ---------- 测试 / 调试产物 ----------
+tools/edge_profile/
+tools/*.png
+tools/archive/*.png
+tools/link_check_log.txt
+tools/_kill_cdp.txt
+screenshots/
+tools/link_check_report.json
+*.log
+
+# ---------- 编辑器 / 系统 ----------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

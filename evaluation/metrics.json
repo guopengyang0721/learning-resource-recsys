@@ -1,0 +1,35 @@
+{
+  "n_train": 3439,
+  "n_test": 816,
+  "n_items": 208,
+  "top_n": 10,
+  "results": {
+    "user_cf": {
+      "precision": 0.0277,
+      "recall": 0.0984,
+      "coverage": 0.6923,
+      "rmse": 0.8436,
+      "rmse_samples": 816,
+      "rmse_filled": 49,
+      "eval_users": 94
+    },
+    "item_cf": {
+      "precision": 0.0202,
+      "recall": 0.0669,
+      "coverage": 0.9567,
+      "rmse": 0.7261,
+      "rmse_samples": 816,
+      "rmse_filled": 0,
+      "eval_users": 94
+    },
+    "svd": {
+      "precision": 0.0319,
+      "recall": 0.0903,
+      "coverage": 0.8317,
+      "rmse": 0.7058,
+      "rmse_samples": 816,
+      "rmse_filled": 0,
+      "eval_users": 94
+    }
+  }
+}
