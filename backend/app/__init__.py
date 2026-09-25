@@ -65,7 +65,8 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(
         title="个性化学习资源推荐系统 API", version="2.0.0",
-        description="Web 数据挖掘课程学年论文配套原型系统",
+        description="基于协同过滤（User-CF / Item-CF）与 SVD 隐语义模型的个性化学习资源推荐系统，"
+                    "提供资源检索、行为采集、个性化推荐、教师上传与审核、管理后台等接口。",
         lifespan=lifespan,
     )
     # 前端与 API 同源部署（StaticFiles 挂载），浏览器不触发跨域；
