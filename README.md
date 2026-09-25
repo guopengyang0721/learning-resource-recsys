@@ -21,6 +21,17 @@
 - 前端：Vue 3 + Element Plus + ECharts（本地 vendored，免 npm 构建）
 - 部署：uvicorn 单进程启动，前端静态文件由后端同源托管，无需额外 Web 服务器
 
+## 获取代码
+
+```bash
+git clone https://github.com/guopengyang0721/learning-resource-recsys.git
+cd learning-resource-recsys
+```
+
+也可以在仓库页面点 **Code → Download ZIP** 后解压使用。
+
+仓库只包含源码：数据库与上传附件目录（`backend/data/`）不在其中，**首次启动会自动创建该目录、建库、生成演示数据并训练推荐模型**（约需数秒至十余秒）。
+
 ## 快速启动
 
 ```bash
