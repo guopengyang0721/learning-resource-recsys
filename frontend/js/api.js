@@ -125,7 +125,8 @@
     similarResources: (id, n = 5) => api(`/api/resources/${id}/similar?n=${n}`),
     myHistory: (limit = 50) => api('/api/user/history?limit=' + limit),
     removeHistory: (logId) => api('/api/user/history/' + logId, { method: 'DELETE' }),
-    myFavorites: (page = 1, size = 12) => api(`/api/user/favorites?page=${page}&size=${size}`),
+    myFavorites: (page = 1, size = 12, sort = 'time') =>
+      api(`/api/user/favorites?page=${page}&size=${size}&sort=${sort}`),
     notifications: () => api('/api/user/notifications'),
     markNotifRead: (id) => api(`/api/user/notifications/${id}/read`, { method: 'POST' }),
     readAllNotifications: () => api('/api/user/notifications/read-all', { method: 'POST' }),

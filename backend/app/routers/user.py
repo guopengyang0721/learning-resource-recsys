@@ -222,13 +222,21 @@ def remove_history(log_id: int, db: Session = Depends(get_db),
 
 @router.get("/favorites")
 def my_favorites(page: int = Query(1, ge=1), size: int = Query(6, ge=1, le=100),
+                 sort: str = Query("time"),
                  db: Session = Depends(get_db),
                  user: User = Depends(get_current_user)):
-    """我的收藏列表（分页）。"""
+    """我的收藏列表（分页 + 排序）。sort 可选 time（收藏时间，默认）/ category（分类）/ title（标题）。"""
     q = (db.query(Favorite, Resource)
          .join(Resource, Favorite.resource_id == Resource.id)
-         .filter(Favorite.user_id == user.id)
-         .order_by(Favorite.id.desc()))
+         .filter(Favorite.user_id == user.id))
+    if sort == "time":
+        q = q.order_by(Favorite.id.desc())
+    elif sort == "category":
+        q = q.order_by(Resource.category.asc(), Favorite.id.desc())
+    elif sort == "title":
+        q = q.order_by(Resource.title.asc())
+    else:
+        raise HTTPException(400, "不支持的排序方式，可选：time / category / title")
     total = q.count()
     rows = q.offset((page - 1) * size).limit(size).all()
     return {"items": [{

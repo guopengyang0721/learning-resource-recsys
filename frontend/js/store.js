@@ -6,6 +6,7 @@
 
   /** 角色中文名：仅用于界面显示；权限判断一律继续用英文 role */
   const ROLE_NAME = { student: '学生', teacher: '教师', admin: '管理员' };
+  const FAV_PAGE_SIZE = 12;                    // 我的收藏每页条数（3 列 × 4 行），分页组件与此保持一致
 
   const state = reactive({
     me: (function () {
@@ -36,7 +37,7 @@
 
     detail: { visible: false, loading: false, info: null, similar: [] },
     history: { items: [], loading: false },
-    favs: { items: [], total: 0, page: 1, loading: false },
+    favs: { items: [], total: 0, page: 1, sort: 'time', loading: false },
     notif: { items: [], unread: 0, open: false },
     portrait: { distribution: {}, total: 0 },
   });
@@ -120,7 +121,7 @@
     state.algo = 'user_cf'; state.keyword = ''; state.category = ''; state.types = [];
     state.sort = 'hot'; state.days = 0;
     state.resList = []; state.resTotal = 0; state.page = 1;
-    state.favs = { items: [], total: 0, page: 1, loading: false };
+    state.favs = { items: [], total: 0, page: 1, sort: 'time', loading: false };
     state.history = { items: [], loading: false };
     state.notif = { items: [], unread: 0, open: false };
     state.stats = null; state.portrait = { distribution: {}, total: 0 };
@@ -255,11 +256,36 @@
     state.favs.loading = true;
     try {
       if (typeof p === 'number') state.favs.page = p;
-      const r = await A.myFavorites(state.favs.page || 1);
+      const r = await A.myFavorites(state.favs.page || 1, FAV_PAGE_SIZE, state.favs.sort);
       state.favs.items = r.items || [];
       state.favs.total = r.total || 0;
     } catch (e) { ElMessage.error('加载收藏失败，请稍后重试'); }
     finally { state.favs.loading = false; }
+  }
+
+  /** 切换收藏排序方式（time / category / title），回到第 1 页重新拉取 */
+  function setFavSort(sort) {
+    if (state.favs.sort === sort) return;
+    state.favs.sort = sort;
+    state.favs.page = 1;
+    loadFavorites();
+  }
+
+  /** 收藏页取消收藏：成功后重拉当前页；若本页已空且非首页则自动回退一页 */
+  async function cancelFav(item) {
+    const id = item.resource_id ?? item.id;
+    if (item._busy) return;                       // 防连点
+    item._busy = true;
+    try {
+      const r = await A.removeFavorite(id);
+      if (r.detail) return ElMessage.error(r.detail);
+      ElMessage.success('已取消收藏');
+      if (state.detail.info && state.detail.info.id === id) state.detail.info.favorited = false;
+      if (state.favs.items.length <= 1 && state.favs.page > 1) state.favs.page -= 1;
+      await loadFavorites();
+    } catch (e) {
+      ElMessage.error('取消收藏失败，请稍后重试');
+    } finally { item._busy = false; }
   }
 
   async function loadStats() {
@@ -323,9 +349,9 @@
   }
 
   window.App.store = {
-    state, doLogin, doRegister, saveInterests, updateProfile, doLogout,
+    state, doLogin, doRegister, saveInterests, updateProfile, doLogout, FAV_PAGE_SIZE,
     loadRec, loadHot, search, rate, fav, view, openDetail,
-    loadHistory, removeHistory, loadFavorites, loadStats, onTab,
+    loadHistory, removeHistory, loadFavorites, setFavSort, cancelFav, loadStats, onTab,
     loadNotifications, markNotifRead, readAllNotifications, loadPortrait, upgradeToTeacher,
     ROLE_NAME,
   };

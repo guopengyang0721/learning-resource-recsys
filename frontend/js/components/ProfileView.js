@@ -6,14 +6,14 @@
     setup() {
       const { ref, watch, nextTick, onBeforeUnmount, computed } = window.Vue;
       const { ElMessage } = window.ElementPlus;
-      const { state, openDetail, removeHistory, loadHistory, loadFavorites,
+      const { state, openDetail, removeHistory, loadHistory, loadFavorites, setFavSort, cancelFav,
               saveInterests, updateProfile, loadPortrait, upgradeToTeacher, onTab } = window.App.store;
       const A = window.App.api;
       const SEC_QUESTIONS = ['你的第一所学校是？', '你最喜欢的课程是？', '你母亲的名字是？',
                              '你最好的朋友的名字是？', '你的出生城市是？'];
       const ROLE_NAME = window.App.store.ROLE_NAME || {};
       const roleName = (r) => ROLE_NAME[r] || r;                      // 角色显示中文（判断仍用英文）
-      const FAV_PAGE_SIZE = 12;                          // 每页收藏数：3 列 × 4 行，需与 api.myFavorites 的默认 size 一致
+      const FAV_PAGE_SIZE = window.App.store.FAV_PAGE_SIZE || 12;   // 每页收藏数（与 store/api 保持同一处定义）
       const interests = computed(() => (state.me.interests || []).filter(Boolean));
       const section = ref('info');                       // info | history | favs
       const editVisible = ref(false);
@@ -205,7 +205,7 @@
       }
 
       return { s: state, section, openDetail, removeHistory, loadHistory, loadFavorites, changeFavPage,
-               roleName, interests, onAccountCmd, FAV_PAGE_SIZE,
+               roleName, interests, onAccountCmd, FAV_PAGE_SIZE, setFavSort, cancelFav,
                editVisible, editInterests, openEdit, submitInterests, loadPortrait, weekly, loadWeekly,
                profileVisible, profileForm, openProfile, submitProfile,
                pwdVisible, pwdForm, pwdLoading, openPwd, submitPwd,
@@ -396,7 +396,15 @@
         <el-card>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
             <div style="color:#666;font-size:13px">共 {{ s.favs.total }} 条收藏，点击卡片查看详情</div>
-            <el-button size="small" @click="loadFavorites">🔄 刷新</el-button>
+            <div style="display:flex;align-items:center;gap:8px">
+              <el-select :model-value="s.favs.sort" size="small" style="width:132px"
+                         @change="setFavSort">
+                <el-option label="收藏时间" value="time"></el-option>
+                <el-option label="按分类" value="category"></el-option>
+                <el-option label="按标题" value="title"></el-option>
+              </el-select>
+              <el-button size="small" :loading="s.favs.loading" @click="loadFavorites">🔄 刷新</el-button>
+            </div>
           </div>
           <el-row :gutter="12" class="fav-grid">
             <el-col v-for="f in s.favs.items" :key="f.resource_id" :xs="24" :sm="12" :md="8" style="margin-bottom:12px">
@@ -407,7 +415,11 @@
                   <el-tag size="small" type="success" style="margin-left:6px">{{ f.type }}</el-tag>
                   <el-tag size="small" type="warning" style="margin-left:6px">难度 {{ f.difficulty }}/5</el-tag>
                 </div>
-                <div style="color:#999;font-size:12px">⭐ 收藏于 {{ f.time }}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+                  <span style="color:#999;font-size:12px">⭐ 收藏于 {{ f.time }}</span>
+                  <el-button size="small" text type="danger" :loading="f._busy"
+                             @click.stop="cancelFav(f)">取消收藏</el-button>
+                </div>
               </el-card>
             </el-col>
           </el-row>
