@@ -78,6 +78,7 @@
 
       const meta = computed(() => PAGE_META[store.state.activeTab] || PAGE_META.recommend);
       return { s: store.state, meta, onTab: store.onTab, doLogout: store.doLogout,
+               roleName: (r) => (store.ROLE_NAME || {})[r] || r,     // 角色显示中文（判断仍用英文）
                openDetail: store.openDetail,
                loadNotifications: store.loadNotifications,
                markNotifRead: store.markNotifRead,
@@ -136,7 +137,7 @@
             <div class="nav-avatar">🎓</div>
             <div class="nav-uinfo">
               <div class="un">{{ s.me.nickname }}</div>
-              <div class="ur">{{ s.me.role }} · {{ s.me.gender || '保密' }}</div>
+              <div class="ur">{{ roleName(s.me.role) }} · {{ s.me.gender || '保密' }}</div>
             </div>
             <el-button size="small" text style="color:#c9d6f0" @click="doLogout">退出</el-button>
           </div>

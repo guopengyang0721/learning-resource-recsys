@@ -4,13 +4,16 @@
 
   C.ProfileView = {
     setup() {
-      const { ref, watch, nextTick, onBeforeUnmount } = window.Vue;
+      const { ref, watch, nextTick, onBeforeUnmount, computed } = window.Vue;
       const { ElMessage } = window.ElementPlus;
       const { state, openDetail, removeHistory, loadHistory, loadFavorites,
               saveInterests, updateProfile, loadPortrait, upgradeToTeacher, onTab } = window.App.store;
       const A = window.App.api;
       const SEC_QUESTIONS = ['你的第一所学校是？', '你最喜欢的课程是？', '你母亲的名字是？',
                              '你最好的朋友的名字是？', '你的出生城市是？'];
+      const ROLE_NAME = window.App.store.ROLE_NAME || {};
+      const roleName = (r) => ROLE_NAME[r] || r;                      // 角色显示中文（判断仍用英文）
+      const interests = computed(() => (state.me.interests || []).filter(Boolean));
       const section = ref('info');                       // info | history | favs
       const editVisible = ref(false);
       const editInterests = ref([]);
@@ -194,6 +197,7 @@
       }
 
       return { s: state, section, openDetail, removeHistory, loadHistory, loadFavorites, changeFavPage,
+               roleName, interests,
                editVisible, editInterests, openEdit, submitInterests, loadPortrait, weekly, loadWeekly,
                profileVisible, profileForm, openProfile, submitProfile,
                pwdVisible, pwdForm, pwdLoading, openPwd, submitPwd,
@@ -222,45 +226,57 @@
       <!-- ===== 子页：个人信息 ===== -->
       <div v-if="section === 'info'" style="margin-top:12px">
         <el-card>
-          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-            <div style="width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,#409eff,#2fa58a);
-                        display:flex;align-items:center;justify-content:center;font-size:42px;flex:none">🎓</div>
-            <div style="flex:1;min-width:220px">
+          <div style="display:flex;align-items:flex-start;gap:22px;flex-wrap:wrap">
+            <div style="width:88px;height:88px;border-radius:50%;flex:none;
+                        background:linear-gradient(135deg,#409eff,#2fa58a);
+                        display:flex;align-items:center;justify-content:center;font-size:42px;
+                        box-shadow:0 4px 14px rgba(64,158,255,.22)">🎓</div>
+
+            <div style="flex:1;min-width:260px">
+              <!-- 昵称 + 角色 + 兴趣状态 -->
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <h2 style="margin:0">{{ s.me.nickname }}</h2>
-                <el-tag>{{ s.me.role }}</el-tag>
-                <el-tag v-if="(s.me.interests || []).filter(Boolean).length" type="success" effect="plain">已设置兴趣</el-tag>
-                <el-tag v-else type="info" effect="plain">未设置兴趣</el-tag>
+                <h2 style="margin:0;font-size:21px;line-height:1.3">{{ s.me.nickname }}</h2>
+                <el-tag size="small" effect="plain">{{ roleName(s.me.role) }}</el-tag>
+                <el-tag v-if="interests.length" type="success" size="small" effect="plain">已设置兴趣</el-tag>
+                <el-tag v-else type="info" size="small" effect="plain">未设置兴趣</el-tag>
               </div>
-              <div style="color:#98a5bd;font-size:13px;margin-top:6px">用户名：{{ s.me.username }} · ID {{ s.me.user_id }}</div>
-              <div style="margin-top:8px;font-size:13px;color:#555;display:flex;gap:14px;flex-wrap:wrap">
-                <span>性别：<b>{{ s.me.gender || '保密' }}</b></span>
-                <span>年级：<b>{{ s.me.grade || '未填写' }}</b></span>
-                <span>学院：<b>{{ s.me.college || '未填写' }}</b></span>
+              <div style="color:#98a5bd;font-size:13px;margin-top:7px">
+                {{ s.me.username }} · ID {{ s.me.user_id }}
               </div>
-              <div style="margin-top:10px">
-                <span style="font-size:13px;color:#666;margin-right:8px">🎯 兴趣类别</span>
-                <el-tag v-for="t in (s.me.interests || []).filter(Boolean)" :key="t"
-                        size="small" type="success" style="margin:0 6px 4px 0">{{ t }}</el-tag>
-                <span v-if="!(s.me.interests || []).filter(Boolean).length" style="color:#999;font-size:13px">
+
+              <!-- 基本信息：用分隔点排列，避免"标签：值"竖向堆叠 -->
+              <div style="margin-top:12px;font-size:13px;color:#909399;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <span>性别 <b style="color:#303133">{{ s.me.gender || '保密' }}</b></span>
+                <span style="color:#e4e7ed">|</span>
+                <span>年级 <b style="color:#303133">{{ s.me.grade || '未填写' }}</b></span>
+                <span style="color:#e4e7ed">|</span>
+                <span>学院 <b style="color:#303133">{{ s.me.college || '未填写' }}</b></span>
+              </div>
+
+              <!-- 兴趣标签 -->
+              <div style="margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span style="font-size:13px;color:#909399">🎯 兴趣</span>
+                <el-tag v-for="t in interests" :key="t" size="small" type="success">{{ t }}</el-tag>
+                <span v-if="!interests.length" style="color:#c0c4cc;font-size:13px">
                   未设置 —— 设置后新账号也能获得个性化推荐
                 </span>
               </div>
-              <div style="margin-top:12px">
-                <el-button type="primary" plain @click="openProfile">📝 编辑资料</el-button>
-                <el-button plain @click="openPwd">🔑 修改密码</el-button>
-                <el-button type="success" plain @click="openEdit">🎯 编辑兴趣</el-button>
-                <el-button :type="s.me.has_sec_question ? 'default' : 'warning'" plain @click="openSec">
-                  🔒 {{ s.me.has_sec_question ? '修改密保问题' : '设置密保问题' }}
-                </el-button>
-                <el-button v-if="s.me.role === 'student'" type="warning" @click="upVisible = true">
-                  👨‍🏫 升级为教师
-                </el-button>
-              </div>
-              <div v-if="!s.me.has_sec_question" style="color:#e6a23c;font-size:12px;margin-top:10px">
-                ⚠️ 尚未设置密保问题，忘记密码时将无法自助找回，只能联系管理员重置。
-              </div>
             </div>
+          </div>
+
+          <!-- 操作区：与信息区用细线分隔；主操作实心、其余朴素，避免多种颜色堆叠 -->
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--el-border-color-lighter);
+                      display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <el-button type="primary" @click="openProfile">编辑资料</el-button>
+            <el-button plain @click="openEdit">编辑兴趣</el-button>
+            <el-button plain @click="openPwd">修改密码</el-button>
+            <el-button plain @click="openSec">
+              {{ s.me.has_sec_question ? '修改密保问题' : '设置密保问题' }}
+            </el-button>
+            <el-button v-if="s.me.role === 'student'" type="warning" plain @click="upVisible = true">升级为教师</el-button>
+            <span v-if="!s.me.has_sec_question" style="color:#e6a23c;font-size:12px;margin-left:6px">
+              ⚠️ 未设置密保问题，忘记密码时只能联系管理员重置
+            </span>
           </div>
         </el-card>
 

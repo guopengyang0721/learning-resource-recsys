@@ -4,6 +4,9 @@
   const { ElMessage } = window.ElementPlus;
   const A = window.App.api;
 
+  /** 角色中文名：仅用于界面显示；权限判断一律继续用英文 role */
+  const ROLE_NAME = { student: '学生', teacher: '教师', admin: '管理员' };
+
   const state = reactive({
     me: (function () {
       const me = window.App.readMe ? window.App.readMe() :
@@ -324,5 +327,6 @@
     loadRec, loadHot, search, rate, fav, view, openDetail,
     loadHistory, removeHistory, loadFavorites, loadStats, onTab,
     loadNotifications, markNotifRead, readAllNotifications, loadPortrait, upgradeToTeacher,
+    ROLE_NAME,
   };
 })();

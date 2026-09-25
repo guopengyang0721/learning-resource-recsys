@@ -1,7 +1,10 @@
 /** 用户管理（管理员）：列表 / 教师邀请码 / 禁用启用 / 重置密码 */
 (function () {
-  const { ref } = window.Vue;
-  const { ElMessage, ElMessageBox } = window.ElementPlus;
+    const { ref } = window.Vue;
+    const { ElMessage, ElMessageBox } = window.ElementPlus;
+    /** 角色中文名（显示用；权限判断仍用英文 role） */
+    const ROLE_NAME = window.App.store.ROLE_NAME || {};
+    const roleName = (r) => ROLE_NAME[r] || r;
   const C = window.App.components = window.App.components || {};
   const A = window.App.api;
 
@@ -97,7 +100,7 @@
         finally { genLoading.value = false; }
       }
 
-      return { items, total, page, size, keyword, load, toggle, openReset, del,
+      return { items, total, page, size, keyword, load, toggle, openReset, del, roleName,
                inviteVisible, inviteItems, latestCode, openInvites, genCode, genLoading };
     },
     mounted() { this.load(); },
@@ -120,7 +123,7 @@
           <el-table-column prop="role" label="角色" width="90">
             <template #default="scope">
               <el-tag size="small" :type="scope.row.role==='admin' ? 'danger' : (scope.row.role==='teacher' ? 'warning' : 'info')">
-                {{ scope.row.role }}
+                {{ roleName(scope.row.role) }}
               </el-tag>
             </template>
           </el-table-column>
