@@ -1,0 +1,29 @@
+{
+  "n_train": 3438,
+  "n_test": 816,
+  "n_items": 200,
+  "top_n": 10,
+  "results": {
+    "user_cf": {
+      "precision": 0.0277,
+      "recall": 0.0975,
+      "coverage": 0.725,
+      "rmse": 0.8558,
+      "eval_users": 94
+    },
+    "item_cf": {
+      "precision": 0.0213,
+      "recall": 0.0687,
+      "coverage": 0.99,
+      "rmse": 0.7258,
+      "eval_users": 94
+    },
+    "svd": {
+      "precision": 0.0319,
+      "recall": 0.0903,
+      "coverage": 0.88,
+      "rmse": 0.7053,
+      "eval_users": 94
+    }
+  }
+}
