@@ -21,5 +21,4 @@ from app import create_app
 app = create_app()
 
 if __name__ == "__main__":
-    # 部署到 Render / Railway 等平台时，必须监听 0.0.0.0 并读取平台下发的 PORT
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
+    uvicorn.run(app, host="127.0.0.1", port=8000)
